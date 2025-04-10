@@ -1,55 +1,41 @@
-logs = []
+import streamlit as st
 
-def sum(a, b):
-    logs.append('sum')
-    if isinstance(a, str) or isinstance(b,str):
-        print("vale andmed")
-        return ""
-    return a+b
+if 'tasks' not in st.session_state:
+    st.session_state.tasks = []
 
-def substr(a, b):
-    logs.append('substarction')
-    if isinstance(a, str) or isinstance(b,str):
-        print("vale andmed")
-        return ""
-    return a-b
+st.title("Todo list")
 
-def mult(a, b):
-    logs.append('multiplication')
-    if isinstance(a, str) or isinstance(b,str):
-        print("vale andmed")
-        return ""
-    return a*b
-
-def divis(a, b):
-    try:
-        logs.append('division')
-        if isinstance(a, str) or isinstance(b,str):
-            print("vale andmed")
-            return ""
-        return a/b
-    except ZeroDivisionError:
-        print("ei saa jagada nullile")
-        return ""
-
-def showLogs(logs):
-    summ = 0
-    sub = 0
-    mult = 0
-    div = 0
-    for elem in logs:
-        if elem == "sum":
-            summ  += 1
-        elif elem == "substarction":
-            sub += 1
-        elif elem == "multiplication":
-            mult += 1
+def add_task():
+    task = st.text_input("Sisesta uus ülesanne:", key="new_task_input")
+    if st.button("Lisa"):
+        if task.strip():
+            st.session_state.tasks.append({"text": task, "done": False})
+            st.rerun()
         else:
-            div +=1
-    return [summ,sub,mult,div]
+            st.warning("Sisesta mitte tühi ülesanne")
 
-print(sum(5, 5))
-print(substr(5, 5))
-print(mult(5, 5))
-print(divis(5, 0))
-print(showLogs(logs))
+add_task()
+
+st.subheader("Ülesanne nimikiri:")
+
+def show_task():
+    if not st.session_state.tasks:
+        st.info("Ei ole ülesandeid")
+        return
+    
+    for index, task in enumerate(st.session_state.tasks):
+        cols = st.columns([0.05, 0.90, 0.05])
+        with cols[0]:
+            task["done"] = st.checkbox("", value=task["done"], key=f"done_{index}")
+        with cols[1]:
+            if task["done"] == True:
+                text = "------", task["text"],"-------"
+            else:
+                text = task["text"]
+            st.markdown(text)
+        with cols[2]:
+            if st.button("Kustuta", key=f"delete_{index}"):
+                st.session_state.tasks.pop(index)
+                st.rerun()
+
+show_task()
